@@ -2,7 +2,7 @@
     "type": "module",
     "main": "src/index.ts",
     "scripts": {
-        "dev": "nodemon -e js,ts --loader tsm .",
+        "dev": "NODE_ENV=development nodemon -e js,ts --loader tsm .",
         "db:generate": "drizzle-kit generate:mysql",
         "db:push": "drizzle-kit push:mysql",
         "start": "tsm ."
