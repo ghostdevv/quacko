@@ -45,7 +45,7 @@ const client = new JellyCommands({
 
 		// Put your testing guild id here
 		// https://jellycommands.dev/guide/commands/dev#setup
-		guilds: ['663140687591768074', '556344107383914547'],
+		guilds: ['663140687591768074'],
 	},
 });
 
