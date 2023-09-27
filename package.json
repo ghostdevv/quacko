@@ -5,6 +5,7 @@
         "dev": "NODE_ENV=development nodemon -e js,ts --loader tsm .",
         "db:generate": "drizzle-kit generate:mysql",
         "db:push": "drizzle-kit push:mysql",
+        "build": "pnpm run db:push",
         "start": "tsm ."
     },
     "dependencies": {
