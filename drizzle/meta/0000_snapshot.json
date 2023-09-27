@@ -1,0 +1,37 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "f5cd40c9-0b49-42a8-b92f-9c2eef7f488b",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "voice_channels": {
+      "name": "voice_channels",
+      "columns": {
+        "channel_id": {
+          "name": "channel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "guild_id": {
+          "name": "guild_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

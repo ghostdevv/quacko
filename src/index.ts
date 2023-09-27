@@ -24,7 +24,10 @@ const client = new JellyCommands({
 	buttons: 'src/buttons',
 
 	clientOptions: {
-		intents: [IntentsBitField.Flags.Guilds],
+		intents: [
+			IntentsBitField.Flags.Guilds,
+			IntentsBitField.Flags.GuildVoiceStates,
+		],
 
 		presence: {
 			activities: [{ name: '🦆 Quacking?', type: ActivityType.Custom }],
@@ -42,7 +45,7 @@ const client = new JellyCommands({
 
 		// Put your testing guild id here
 		// https://jellycommands.dev/guide/commands/dev#setup
-		guilds: ['663140687591768074'],
+		guilds: ['663140687591768074', '556344107383914547'],
 	},
 });
 
