@@ -3,6 +3,8 @@
     "main": "src/index.ts",
     "scripts": {
         "dev": "nodemon -e js,ts --loader tsm .",
+        "db:generate": "drizzle-kit generate:mysql",
+        "db:push": "drizzle-kit push:mysql",
         "start": "tsm ."
     },
     "dependencies": {
@@ -13,6 +15,9 @@
     },
     "devDependencies": {
         "@types/node": "^20.7.0",
+        "drizzle-kit": "^0.19.13",
+        "drizzle-orm": "^0.28.6",
+        "mysql2": "^3.6.1",
         "nodemon": "^3.0.1",
         "tsm": "^2.3.0"
     }
