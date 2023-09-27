@@ -23,8 +23,8 @@ const client = new JellyCommands({
 
         // Put your testing guild id here
         // https://jellycommands.dev/guide/commands/dev#setup
-        guilds: [''],
-    },
+		guilds: ['663140687591768074'],
+	},
 });
 
 // Automatically reads the DISCORD_TOKEN environment variable
