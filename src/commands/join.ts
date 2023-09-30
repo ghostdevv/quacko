@@ -1,5 +1,5 @@
+import { GuildVoiceManager } from '../lib/voice';
 import { command } from 'jellycommands';
-import { join_vc } from '../lib/voice';
 
 export default command({
 	name: 'join',
@@ -32,7 +32,7 @@ export default command({
 			});
 		}
 
-		await join_vc(guild, member.voice.channelId);
+		await GuildVoiceManager.create_or_get(guild, member.voice.channelId);
 
 		await interaction.followUp({
 			content: `Joined ${member.voice.channel} 🦆`,

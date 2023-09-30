@@ -1,47 +1,100 @@
-import { joinVoiceChannel, type VoiceConnection } from '@discordjs/voice';
+import {
+	joinVoiceChannel,
+	type AudioResource,
+	type VoiceConnection,
+} from '@discordjs/voice';
 import type { Client, Guild } from 'discord.js';
 import { voiceChannels } from '../schema';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
 
-const connection_map = new Map<string, VoiceConnection>();
+const manager_map = new Map<string, GuildVoiceManager>();
 
-export async function join_vc(guild: Guild, channelId: string, save = true) {
-	const guildId = guild.id;
+export class GuildVoiceManager {
+	constructor(
+		private readonly connection: VoiceConnection,
+		public readonly guild_id: string,
+		public channel_id: string,
+	) {}
 
-	const connection = joinVoiceChannel({
-		adapterCreator: guild.voiceAdapterCreator,
-		selfDeaf: true,
-		channelId,
-		guildId,
-	});
+	async set_moved(new_channel_id: string) {
+		this.channel_id = new_channel_id;
 
-	connection_map.set(guildId, connection);
+		await db
+			.update(voiceChannels)
+			.set({ channelId: new_channel_id })
+			.where(eq(voiceChannels.guildId, this.guild_id));
+	}
 
-	if (save) {
-		await db.insert(voiceChannels).values({
-			channelId,
-			guildId,
+	async destroy() {
+		this.connection.destroy(true);
+		manager_map.delete(this.guild_id);
+
+		await db
+			.delete(voiceChannels)
+			.where(eq(voiceChannels.guildId, this.guild_id));
+	}
+
+	static async assert_destroyed(guild_id: string) {
+		const manager = manager_map.get(guild_id);
+
+		if (manager) {
+			await manager.destroy();
+		} else {
+			await db
+				.delete(voiceChannels)
+				.where(eq(voiceChannels.guildId, guild_id));
+		}
+	}
+
+	static async create_or_get(guild: Guild, channel_id: string) {
+		const guild_id = guild.id;
+
+		const existing_manager = manager_map.get(guild_id);
+
+		//? If there is an existing connection return it
+		if (existing_manager) {
+			//? If the state is out of sync, sync it
+			if (existing_manager.channel_id != channel_id) {
+				await existing_manager.set_moved(channel_id);
+			}
+
+			return existing_manager;
+		}
+
+		//? Join the voice channel
+		const connection = joinVoiceChannel({
+			adapterCreator: guild.voiceAdapterCreator,
+			channelId: channel_id,
+			guildId: guild_id,
+			selfDeaf: true,
 		});
+
+		const manager = new GuildVoiceManager(connection, guild_id, channel_id);
+
+		manager_map.set(guild_id, manager);
+
+		const [saved] = await db
+			.select()
+			.from(voiceChannels)
+			.where(eq(voiceChannels.guildId, guild_id))
+			.limit(1);
+
+		//? If the row exists and is not up to date, update it
+		if (saved?.channelId != channel_id) {
+			await manager.set_moved(channel_id);
+		}
+
+		//? If row doesn't exist add it
+		if (!saved) {
+			await db.insert(voiceChannels).values({
+				channelId: channel_id,
+				guildId: guild_id,
+			});
+		}
+
+		return manager;
 	}
-}
-
-export async function leave_vc(guildId: string) {
-	const connection = connection_map.get(guildId);
-
-	if (connection) {
-		connection.destroy(true);
-		connection_map.delete(guildId);
-	}
-
-	await db.delete(voiceChannels).where(eq(voiceChannels.guildId, guildId));
-}
-
-export async function move_channel(guildId: string, newChannelId: string) {
-	await db
-		.update(voiceChannels)
-		.set({ channelId: newChannelId })
-		.where(eq(voiceChannels.guildId, guildId));
 }
 
 export async function init(client: Client) {
@@ -49,6 +102,6 @@ export async function init(client: Client) {
 
 	for (const { channelId, guildId } of vcConnections) {
 		const guild = await client.guilds.fetch(guildId);
-		await join_vc(guild, channelId, false);
+		await GuildVoiceManager.create_or_get(guild, channelId);
 	}
 }

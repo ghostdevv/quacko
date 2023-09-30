@@ -1,4 +1,4 @@
-import { leave_vc, move_channel } from '../lib/voice';
+import { GuildVoiceManager } from '../lib/voice';
 import { event } from 'jellycommands';
 
 export default event({
@@ -10,14 +10,14 @@ export default event({
 			//? Handle voice state changes
 
 			if (newState.member.voice.channelId) {
-				//? Update the channel id to be the new one
-				await move_channel(
-					newState.guild.id,
+				//? Assert the manager
+				await GuildVoiceManager.create_or_get(
+					newState.guild,
 					newState.member.voice.channelId,
 				);
 			} else {
 				//? Delete the voice state from the db
-				await leave_vc(newState.guild.id);
+				await GuildVoiceManager.assert_destroyed(newState.guild.id);
 			}
 		}
 	},
