@@ -1,7 +1,11 @@
 import {
+	AudioPlayer,
 	joinVoiceChannel,
+	createAudioPlayer,
+	NoSubscriberBehavior,
 	type AudioResource,
 	type VoiceConnection,
+	createAudioResource,
 } from '@discordjs/voice';
 import type { Client, Guild } from 'discord.js';
 import { voiceChannels } from '../schema';
@@ -11,11 +15,26 @@ import { db } from './db';
 const manager_map = new Map<string, GuildVoiceManager>();
 
 export class GuildVoiceManager {
+	private player: AudioPlayer;
+
 	constructor(
-		private readonly connection: VoiceConnection,
+		private connection: VoiceConnection,
 		public readonly guild_id: string,
 		public channel_id: string,
-	) {}
+	) {
+		this.player = createAudioPlayer({
+			behaviors: {
+				noSubscriber: NoSubscriberBehavior.Play,
+			},
+		});
+
+		this.connection.subscribe(this.player);
+	}
+
+	async play(sound_path: string) {
+		const resource = createAudioResource(sound_path);
+		this.player.play(resource);
+	}
 
 	async set_moved(new_channel_id: string) {
 		this.channel_id = new_channel_id;
@@ -45,6 +64,10 @@ export class GuildVoiceManager {
 				.delete(voiceChannels)
 				.where(eq(voiceChannels.guildId, guild_id));
 		}
+	}
+
+	static get(guild_id: string) {
+		return manager_map.get(guild_id);
 	}
 
 	static async create_or_get(guild: Guild, channel_id: string) {
