@@ -6,11 +6,13 @@ import {
 	type VoiceConnection,
 	createAudioResource,
 	AudioPlayerStatus,
+	VoiceConnectionStatus,
 } from '@discordjs/voice';
 import type { Client, Guild } from 'discord.js';
 import { voiceChannels } from '../schema';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
+import { SOUNDS } from './soundboard';
 
 const manager_map = new Map<string, GuildVoiceManager>();
 
@@ -22,6 +24,10 @@ export class GuildVoiceManager {
 		public readonly guild_id: string,
 		public channel_id: string,
 	) {
+		this.connection.on(VoiceConnectionStatus.Ready, () => {
+			this.play(SOUNDS['🦆']);
+		});
+
 		this.player = createAudioPlayer({
 			behaviors: {
 				noSubscriber: NoSubscriberBehavior.Play,
