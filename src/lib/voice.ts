@@ -3,9 +3,9 @@ import {
 	joinVoiceChannel,
 	createAudioPlayer,
 	NoSubscriberBehavior,
-	type AudioResource,
 	type VoiceConnection,
 	createAudioResource,
+	AudioPlayerStatus,
 } from '@discordjs/voice';
 import type { Client, Guild } from 'discord.js';
 import { voiceChannels } from '../schema';
@@ -31,9 +31,15 @@ export class GuildVoiceManager {
 		this.connection.subscribe(this.player);
 	}
 
-	async play(sound_path: string) {
+	play(sound_path: string) {
+		if (this.player.state.status == AudioPlayerStatus.Playing) {
+			return 'busy';
+		}
+
 		const resource = createAudioResource(sound_path);
 		this.player.play(resource);
+
+		return 'playing';
 	}
 
 	async set_moved(new_channel_id: string) {

@@ -44,10 +44,13 @@ export default command({
 			true,
 		) as keyof typeof SOUNDS;
 
-		manager.play(SOUNDS[sound]);
+		const result = manager.play(SOUNDS[sound]);
 
 		interaction.followUp({
-			content: `Playing "${sound}" in <#${manager.channel_id}>`,
+			content:
+				result == 'busy'
+					? 'Already playing a sound'
+					: `Playing "${sound}" in <#${manager.channel_id}>`,
 		});
 	},
 });
