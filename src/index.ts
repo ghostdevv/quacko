@@ -1,8 +1,6 @@
 import 'dotenv/config';
 import { IntentsBitField, ActivityType } from 'discord.js';
 import { JellyCommands } from 'jellycommands';
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
 
 const client = new JellyCommands({
 	// https://jellycommands.dev/guide/commands/loading
