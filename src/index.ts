@@ -28,7 +28,7 @@ const client = new JellyCommands({
 	dev: {
 		// In testing we should enable this, it will make all our commands register in our testing guild
 		// https://jellycommands.dev/guide/commands/dev#global-dev-mode
-		global: true,
+		global: process.env['NODE_ENV'] == 'development',
 
 		// Put your testing guild id here
 		// https://jellycommands.dev/guide/commands/dev#setup
