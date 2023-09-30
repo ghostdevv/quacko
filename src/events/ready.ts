@@ -1,21 +1,10 @@
-import { joinVoiceChannel } from '@discordjs/voice';
-import { voiceChannels } from '../schema';
 import { event } from 'jellycommands';
+import { init } from '../lib/voice';
 
 export default event({
 	name: 'ready',
-	run: async ({ props }, client) => {
-		const vcConnections = await props.db.select().from(voiceChannels);
-
-		for (const { channelId, guildId } of vcConnections) {
-			const guild = await client.guilds.fetch(guildId);
-
-			joinVoiceChannel({
-				adapterCreator: guild.voiceAdapterCreator,
-				channelId,
-				guildId,
-			});
-		}
+	run: async ({}, client) => {
+		await init(client);
 
 		if (process.env['NODE_ENV'] != 'development') {
 			await fetch('https://webhook.willow.sh', {

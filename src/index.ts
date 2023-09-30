@@ -4,15 +4,6 @@ import { JellyCommands } from 'jellycommands';
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 
-const poolConnection = mysql.createPool({
-	host: process.env['DB_HOST'],
-	user: process.env['DB_USER'],
-	database: process.env['DB_NAME'],
-	password: process.env['DB_PASSWORD'],
-});
-
-const db = drizzle(poolConnection);
-
 const client = new JellyCommands({
 	// https://jellycommands.dev/guide/commands/loading
 	commands: 'src/commands',
@@ -32,10 +23,6 @@ const client = new JellyCommands({
 		presence: {
 			activities: [{ name: '🦆 Quacking?', type: ActivityType.Custom }],
 		},
-	},
-
-	props: {
-		db,
 	},
 
 	dev: {
