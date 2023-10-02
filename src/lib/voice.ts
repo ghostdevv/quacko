@@ -13,6 +13,7 @@ import { voiceChannels } from '../schema';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { SOUNDS } from './soundboard';
+import { once } from 'events';
 
 const manager_map = new Map<string, GuildVoiceManager>();
 
@@ -24,8 +25,8 @@ export class GuildVoiceManager {
 		public readonly guild_id: string,
 		public channel_id: string,
 	) {
-		this.connection.on(VoiceConnectionStatus.Ready, () => {
-			this.play(SOUNDS['🦆']);
+		this.connection.on(VoiceConnectionStatus.Ready, async () => {
+			await this.play(SOUNDS['🦆']);
 		});
 
 		this.player = createAudioPlayer({
@@ -37,7 +38,7 @@ export class GuildVoiceManager {
 		this.connection.subscribe(this.player);
 	}
 
-	play(sound_path: string) {
+	async play(sound_path: string) {
 		if (this.player.state.status == AudioPlayerStatus.Playing) {
 			return 'busy';
 		}
@@ -45,11 +46,19 @@ export class GuildVoiceManager {
 		const resource = createAudioResource(sound_path);
 		this.player.play(resource);
 
-		return 'playing';
+		await once(this.player, AudioPlayerStatus.Idle);
+
+		return 'done';
 	}
 
 	async set_moved(new_channel_id: string) {
 		this.channel_id = new_channel_id;
+
+		this.connection.rejoin({
+			channelId: new_channel_id,
+			selfDeaf: true,
+			selfMute: false,
+		});
 
 		await db
 			.update(voiceChannels)
@@ -114,6 +123,8 @@ export class GuildVoiceManager {
 			.from(voiceChannels)
 			.where(eq(voiceChannels.guildId, guild_id))
 			.limit(1);
+
+		console.log({ saved_id: saved?.channelId, new: channel_id });
 
 		//? If the row exists and is not up to date, update it
 		if (saved?.channelId != channel_id) {
