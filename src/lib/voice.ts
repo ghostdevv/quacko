@@ -124,8 +124,6 @@ export class GuildVoiceManager {
 			.where(eq(voiceChannels.guildId, guild_id))
 			.limit(1);
 
-		console.log({ saved_id: saved?.channelId, new: channel_id });
-
 		//? If the row exists and is not up to date, update it
 		if (saved?.channelId != channel_id) {
 			await manager.move(channel_id);
