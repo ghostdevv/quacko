@@ -43,7 +43,7 @@ export default event({
 				await manager.play(SOUNDS['the-office']);
 
 				if (quacko_previous_vc_id) {
-					await manager.set_moved(quacko_previous_vc_id);
+					await manager.move(quacko_previous_vc_id);
 				}
 			}
 		}

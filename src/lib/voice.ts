@@ -51,7 +51,7 @@ export class GuildVoiceManager {
 		return 'done';
 	}
 
-	async set_moved(new_channel_id: string) {
+	async move(new_channel_id: string) {
 		this.channel_id = new_channel_id;
 
 		this.connection.rejoin({
@@ -100,7 +100,7 @@ export class GuildVoiceManager {
 		if (existing_manager) {
 			//? If the state is out of sync, sync it
 			if (existing_manager.channel_id != channel_id) {
-				await existing_manager.set_moved(channel_id);
+				await existing_manager.move(channel_id);
 			}
 
 			return existing_manager;
@@ -128,7 +128,7 @@ export class GuildVoiceManager {
 
 		//? If the row exists and is not up to date, update it
 		if (saved?.channelId != channel_id) {
-			await manager.set_moved(channel_id);
+			await manager.move(channel_id);
 		}
 
 		//? If row doesn't exist add it
