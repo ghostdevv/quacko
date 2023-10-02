@@ -29,19 +29,21 @@ export default event({
 		if (newState.channel?.id == OFFICE_VOICE_CHANNEL_ID) {
 			//? Check if the channel was previously empty
 			if (newState.channel.members.size == 1) {
-				console.log('a', newState.channel.id);
-
+				//? Store the previous channel id Quacko was in, if any
 				const quacko_previous_vc_id = GuildVoiceManager.get(
 					newState.guild.id,
 				)?.channel_id;
 
+				//? Create/get the manager
 				const manager = await GuildVoiceManager.create_or_get(
 					newState.guild,
 					newState.channel.id,
 				);
 
+				//? Play the office
 				await manager.play(SOUNDS['the-office']);
 
+				//? If there was a previous vc move back
 				if (quacko_previous_vc_id) {
 					await manager.move(quacko_previous_vc_id);
 				}
