@@ -1,10 +1,12 @@
 import { join } from 'desm';
 
+function sound(file: string) {
+	return join(import.meta.url, `./sounds/${file}`);
+}
+
 export const SOUNDS = Object.freeze({
-	'better-off-quacko': join(
-		import.meta.url,
-		'./sounds/better-off-quacko.mp3',
-	),
-	'bruhdy-🦆': join(import.meta.url, './sounds/bruhdy-quack.mp3'),
-	'🦆': join(import.meta.url, './sounds/quack.mp3'),
+	'better-off-quacko': sound('better-off-quacko.mp3'),
+	'bruhdy-🦆': sound('bruhdy-quack.mp3'),
+	'the-office': sound('the-office.mp3'),
+	'🦆': sound('quack.mp3'),
 });
