@@ -11,6 +11,7 @@ export default command({
 			name: 'sound',
 			description: 'Sound to play',
 			type: 'String',
+			required: true,
 			choices: Object.keys(SOUNDS).map((sound) => ({
 				name: sound,
 				value: sound,
