@@ -32,11 +32,31 @@ export default command({
 			});
 		}
 
+		const member = await guild.members.fetch(interaction.user.id);
+
+		if (!member) {
+			return await interaction.followUp({
+				content: 'Unable to find you',
+			});
+		}
+
+		if (!member.voice.channel?.id) {
+			return await interaction.followUp({
+				content: 'Please join a VC',
+			});
+		}
+
 		const manager = GuildVoiceManager.get(guild.id);
 
 		if (!manager) {
 			return await interaction.followUp({
-				content: 'Not in a VC',
+				content: "I'm not in a VC",
+			});
+		}
+
+		if (manager.channel_id != member.voice.channelId) {
+			return await interaction.followUp({
+				content: 'You must be in the same VC as me',
 			});
 		}
 
@@ -45,7 +65,7 @@ export default command({
 			true,
 		) as keyof typeof SOUNDS;
 
-		const result = manager.play(SOUNDS[sound]);
+		const result = await manager.play(SOUNDS[sound]);
 
 		interaction.followUp({
 			content:
