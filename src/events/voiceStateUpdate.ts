@@ -1,6 +1,7 @@
 import { GuildVoiceManager } from '../lib/voice';
 import { SOUNDS } from '../lib/soundboard';
 import { event } from 'jellycommands';
+import { log } from '../lib/log';
 
 const OFFICE_VOICE_CHANNEL_ID =
 	process.env['OFFICE_VOICE_CHANNEL_ID'] ?? 'none';
@@ -39,6 +40,17 @@ export default event({
 					newState.guild,
 					newState.channel.id,
 				);
+
+				await log({
+					icon: '🏢',
+					channel: 'vc',
+					event: 'The Office',
+					description: 'Doing a "The Office"',
+					tags: {
+						trigger_user_id: `${newState.member?.id}`,
+						size: `${newState.channel.members.size}`,
+					},
+				});
 
 				//? Play the office
 				await manager.play(SOUNDS['the-office']);

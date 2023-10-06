@@ -14,6 +14,7 @@ import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { SOUNDS } from './soundboard';
 import { once } from 'events';
+import { log, set_insight } from './log';
 
 const manager_map = new Map<string, GuildVoiceManager>();
 
@@ -26,7 +27,7 @@ export class GuildVoiceManager {
 		public channel_id: string,
 	) {
 		this.connection.on(VoiceConnectionStatus.Ready, async () => {
-			await this.play(SOUNDS['🦆']);
+			await this.play(SOUNDS['🦆'], true);
 		});
 
 		this.player = createAudioPlayer({
@@ -38,13 +39,28 @@ export class GuildVoiceManager {
 		this.connection.subscribe(this.player);
 	}
 
-	async play(sound_path: string) {
+	async play(sound_path: string, is_system = false) {
 		if (this.player.state.status == AudioPlayerStatus.Playing) {
 			return 'busy';
 		}
 
 		const resource = createAudioResource(sound_path);
 		this.player.play(resource);
+
+		if (!is_system) {
+			await log({
+				icon: '🔊',
+				channel: 'sounds',
+				event: 'Playing Sound',
+				description: `Playing sound ${sound_path} in ${this.channel_id}`,
+				tags: {
+					state: this.player.state.status,
+					channel_id: this.channel_id,
+					guild_id: this.guild_id,
+					sound_path: sound_path,
+				},
+			});
+		}
 
 		await once(this.player, AudioPlayerStatus.Idle);
 
@@ -70,9 +86,18 @@ export class GuildVoiceManager {
 		this.connection.destroy(true);
 		manager_map.delete(this.guild_id);
 
-		await db
-			.delete(voiceChannels)
-			.where(eq(voiceChannels.guildId, this.guild_id));
+		await log({
+			icon: '👋',
+			channel: 'vc',
+			event: 'Left VC',
+			description: `Left VC ${this.channel_id} in ${this.guild_id}`,
+			tags: {
+				channel_id: this.channel_id,
+				guild_id: this.guild_id,
+			},
+		});
+
+		await GuildVoiceManager.assert_destroyed(this.guild_id);
 	}
 
 	static async assert_destroyed(guild_id: string) {
@@ -80,11 +105,13 @@ export class GuildVoiceManager {
 
 		if (manager) {
 			await manager.destroy();
-		} else {
-			await db
-				.delete(voiceChannels)
-				.where(eq(voiceChannels.guildId, guild_id));
 		}
+
+		await db
+			.delete(voiceChannels)
+			.where(eq(voiceChannels.guildId, guild_id));
+
+		await log_connections();
 	}
 
 	static get(guild_id: string) {
@@ -118,6 +145,19 @@ export class GuildVoiceManager {
 
 		manager_map.set(guild_id, manager);
 
+		await log_connections();
+
+		await log({
+			icon: '🎤',
+			channel: 'vc',
+			event: 'Joined VC',
+			description: `Joined VC with id ${channel_id} in "${guild.name}" (${guild.id})`,
+			tags: {
+				guild_id: guild.id,
+				channel_id,
+			},
+		});
+
 		const [saved] = await db
 			.select()
 			.from(voiceChannels)
@@ -141,6 +181,10 @@ export class GuildVoiceManager {
 	}
 }
 
+async function log_connections() {
+	await set_insight('VCs', '🎤', manager_map.size);
+}
+
 export async function init(client: Client) {
 	const vcConnections = await db.select().from(voiceChannels);
 
@@ -148,4 +192,6 @@ export async function init(client: Client) {
 		const guild = await client.guilds.fetch(guildId);
 		await GuildVoiceManager.create_or_get(guild, channelId);
 	}
+
+	await log_connections();
 }
