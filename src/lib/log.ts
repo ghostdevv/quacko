@@ -28,6 +28,10 @@ export interface LogOptions {
 }
 
 export async function log(options: LogOptions) {
+	console.log(
+		`[${options.channel}] [${options.event}] ${options.icon} - ${options.description}`,
+	);
+
 	await logsnag('/log', {
 		method: 'POST',
 		body: {

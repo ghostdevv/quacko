@@ -1,9 +1,19 @@
 import { GuildVoiceManager } from '../lib/voice';
+import { ChannelType } from 'discord.js';
 import { command } from 'jellycommands';
 
 export default command({
 	name: 'join',
 	description: 'Join the vc',
+
+	options: [
+		{
+			name: 'channel',
+			type: 'Channel',
+			description: 'Select the channel to join',
+			channelTypes: [ChannelType.GuildVoice],
+		},
+	],
 
 	global: true,
 	defer: true,
@@ -26,16 +36,20 @@ export default command({
 			});
 		}
 
-		if (!member.voice.channel || !member.voice.channelId) {
+		const channel_id =
+			interaction.options.getChannel('channel')?.id ||
+			member.voice.channelId;
+
+		if (!channel_id) {
 			return await interaction.followUp({
-				content: 'Please join a VC',
+				content: `Please join a VC or provide the "channel" option`,
 			});
 		}
 
-		await GuildVoiceManager.create_or_get(guild, member.voice.channelId);
+		await GuildVoiceManager.create_or_get(guild, channel_id);
 
 		await interaction.followUp({
-			content: `Joined ${member.voice.channel} 🦆`,
+			content: `Joined <#${channel_id}> 🦆`,
 		});
 	},
 });
