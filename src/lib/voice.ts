@@ -183,6 +183,9 @@ async function log_connections() {
 	await set_insight('VCs', '🎤', manager_map.size);
 }
 
+//? Run every hour
+setInterval(log_connections, 3_600_000);
+
 export async function init(client: Client) {
 	const vcConnections = await db.select().from(voiceChannels);
 
