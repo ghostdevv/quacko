@@ -39,11 +39,11 @@ export class GuildVoiceManager {
 		this.connection.subscribe(this.player);
 	}
 
-	async play(sound_path: string, is_system = false) {
-		if (this.player.state.status == AudioPlayerStatus.Playing) {
-			return 'busy';
-		}
+	get status() {
+		return this.player.state.status;
+	}
 
+	async play(sound_path: string, is_system = false) {
 		const resource = createAudioResource(sound_path);
 		this.player.play(resource);
 
@@ -63,8 +63,6 @@ export class GuildVoiceManager {
 		}
 
 		await once(this.player, AudioPlayerStatus.Idle);
-
-		return 'done';
 	}
 
 	async move(new_channel_id: string) {

@@ -1,3 +1,4 @@
+import { AudioPlayerStatus } from '@discordjs/voice';
 import { GuildVoiceManager } from '../lib/voice';
 import { SOUNDS } from '../lib/soundboard';
 import { command } from 'jellycommands';
@@ -54,6 +55,12 @@ export default command({
 			});
 		}
 
+		if (manager.status == AudioPlayerStatus.Playing) {
+			return await interaction.followUp({
+				content: 'Already playing a sound',
+			});
+		}
+
 		if (manager.channel_id != member.voice.channelId) {
 			return await interaction.followUp({
 				content: 'You must be in the same VC as me',
@@ -65,13 +72,10 @@ export default command({
 			true,
 		) as keyof typeof SOUNDS;
 
-		const result = await manager.play(SOUNDS[sound]);
+		manager.play(SOUNDS[sound]);
 
 		interaction.followUp({
-			content:
-				result == 'busy'
-					? 'Already playing a sound'
-					: `Playing "${sound}" in <#${manager.channel_id}>`,
+			content: `Playing "${sound}" in <#${manager.channel_id}>`,
 		});
 	},
 });
