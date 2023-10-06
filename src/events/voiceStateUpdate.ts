@@ -28,8 +28,12 @@ export default event({
 
 		//? Check if the channel is the office
 		if (newState.channel?.id == OFFICE_VOICE_CHANNEL_ID) {
-			//? Check if the channel was previously empty
-			if (newState.channel.members.size == 1) {
+			if (
+				//? Check if the channel was previously empty
+				newState.channel.members.size == 1 &&
+				//? Don't do a "The office" if it's just quacko
+				newState.channel.members.first()?.id != client.user?.id
+			) {
 				//? Store the previous channel id Quacko was in, if any
 				const quacko_previous_vc_id = GuildVoiceManager.get(
 					newState.guild.id,
