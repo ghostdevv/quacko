@@ -26,8 +26,12 @@ export default event({
 			}
 		}
 
-		//? Check if the channel is the office
-		if (newState.channel?.id == OFFICE_VOICE_CHANNEL_ID) {
+		if (
+			//? Check if the old channel is not the office
+			oldState.channelId != OFFICE_VOICE_CHANNEL_ID &&
+			//? Check if the channel is the office
+			newState.channel?.id == OFFICE_VOICE_CHANNEL_ID
+		) {
 			if (
 				//? Check if the channel was previously empty
 				newState.channel.members.size == 1 &&
