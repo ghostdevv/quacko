@@ -69,5 +69,34 @@ export default event({
 				}
 			}
 		}
+
+		if (
+			//? Check if a channel move/join has occured
+			oldState.channelId != newState.channelId &&
+			//? Check if it's GHOST
+			newState.member?.id == '282839711834177537' &&
+			//? Check there is a current channel
+			newState.channel?.id
+		) {
+			const manager = GuildVoiceManager.get(newState.guild.id);
+
+			if (manager) {
+				const old_channel_id = manager?.channel_id;
+
+				await manager.move(newState.channel.id);
+
+				await log({
+					icon: '👻',
+					channel: 'vc',
+					event: 'Follow GHOST',
+					description: 'Moved to follow GHOST',
+					tags: {
+						channel_id: newState.channel.id,
+						guild_id: newState.guild.id,
+						old_channel_id,
+					},
+				});
+			}
+		}
 	},
 });
