@@ -26,9 +26,9 @@ export class GuildVoiceManager {
 		public readonly guild_id: string,
 		public channel_id: string,
 	) {
-		this.connection.on(VoiceConnectionStatus.Ready, async () => {
-			await this.play(SOUNDS['🦆'], true);
-		});
+		// this.connection.on(VoiceConnectionStatus.Ready, async () => {
+		// 	await this.play(SOUNDS['🦆'], true);
+		// });
 
 		this.player = createAudioPlayer({
 			behaviors: {
